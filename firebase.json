@@ -1,0 +1,6 @@
+{
+  "firestore": {
+    "database": "ai-studio-telacast-fa5620eb-bbb2-4868-8fdd-1bb1fbc4004d",
+    "rules": "firestore.rules"
+  }
+}

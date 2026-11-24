@@ -1,0 +1,183 @@
+{
+  "entities": {
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Configurações públicas da vitrine e do app Jogos do Mengão gerenciadas pelo administrador.",
+      "type": "object",
+      "properties": {
+        "appName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60,
+          "description": "Nome exibido no site e no aplicativo"
+        },
+        "tagline": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160,
+          "description": "Subtítulo da vitrine"
+        },
+        "whatsappNumber": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Número WhatsApp do administrador com DDI e DDD"
+        },
+        "pixKey": {
+          "type": "string",
+          "maxLength": 140,
+          "description": "Chave Pix para pagamento"
+        },
+        "pixType": {
+          "type": "string",
+          "enum": ["CPF", "CNPJ", "E-mail", "Telefone", "Aleatória"],
+          "description": "Tipo da chave Pix"
+        },
+        "pixReceiverName": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Nome do recebedor exibido no Pix"
+        },
+        "pixQrCodeDataUrl": {
+          "type": "string",
+          "maxLength": 150000,
+          "description": "QR Code Pix (Data URL PNG/JPEG/WEBP ou URL HTTPS)"
+        },
+        "tvOnlyAntiRetransmission": {
+          "type": "boolean",
+          "description": "Bloqueia retransmissão fora das TVs autorizadas (Android TV e LG webOS)"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data da última atualização pelo administrador"
+        }
+      },
+      "required": [
+        "appName",
+        "tagline",
+        "whatsappNumber",
+        "pixKey",
+        "pixType",
+        "pixReceiverName",
+        "tvOnlyAntiRetransmission",
+        "updatedAt"
+      ]
+    },
+    "SubscriptionPlan": {
+      "title": "SubscriptionPlan",
+      "description": "Plano de assinatura exibido na vitrine pública e gerenciado pelo administrador.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "priceText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "days": {
+          "type": "integer"
+        },
+        "periodLabel": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "features": {
+          "type": "array"
+        },
+        "featured": {
+          "type": "boolean"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "sortOrder": {
+          "type": "integer"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "subtitle",
+        "priceText",
+        "days",
+        "periodLabel",
+        "features",
+        "featured",
+        "active",
+        "sortOrder",
+        "updatedAt"
+      ]
+    },
+    "OfflineLicenseLog": {
+      "title": "OfflineLicenseLog",
+      "description": "Registro administrativo de chave offline gerada para um aparelho.",
+      "type": "object",
+      "properties": {
+        "deviceCode": {
+          "type": "string",
+          "pattern": "^TC-[A-Z0-9]{4}-[A-Z0-9]{4}$",
+          "maxLength": 20
+        },
+        "plano": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "dias": {
+          "type": "integer"
+        },
+        "expira_em": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "activationKey": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 256
+        },
+        "createdByUid": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "deviceCode",
+        "plano",
+        "dias",
+        "expira_em",
+        "activationKey",
+        "createdByUid",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/AppSettings" },
+      "description": "Documento público 'public' com nome do app, WhatsApp, chave Pix e trava anti-retransmissão."
+    },
+    "/plans/{planId}": {
+      "schema": { "$ref": "#/entities/SubscriptionPlan" },
+      "description": "Catálogo de planos e valores da vitrine administrado via conta Google."
+    },
+    "/offline_licenses/{licenseId}": {
+      "schema": { "$ref": "#/entities/OfflineLicenseLog" },
+      "description": "Histórico de chaves offline emitidas pelo administrador."
+    }
+  }
+}

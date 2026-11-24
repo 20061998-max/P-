@@ -1,0 +1,28 @@
+node_modules/
+build/
+dist/
+dev-dist/
+coverage/
+.firebase/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Runtime data files (não versionar chaves nem estado local no GitHub)
+data/store.json
+data/store.json.tmp
+data/license-keypair.json
+data/offline-licenses.json
+
+# Android Gradle & local build outputs
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.apk
+!public/downloads/*.apk
+
+# Local AI Studio artifacts & uploaded chat screenshots
+.aistudio/
+public/assets/aistudio/

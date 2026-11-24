@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogos do Mengão TV — LG webOS</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%;
+      background: #09090b; color: #f8fafc;
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      font-size: clamp(14px, 1.15vw, 22px);
+    }
+    .app {
+      display: flex; flex-direction: column; height: 100dvh; padding: clamp(16px, 2vw, 34px) clamp(18px, 3vw, 44px); gap: clamp(12px, 1.4vw, 20px);
+    }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #27272a; padding-bottom: clamp(10px, 1.2vw, 18px); gap: 14px; flex-wrap: wrap;
+    }
+    .brand { font-size: clamp(20px, 1.8vw, 32px); font-weight: 800; letter-spacing: -0.02em; color: #ffffff; }
+    .meta { font-size: clamp(12px, 0.9vw, 16px); color: #a1a1aa; font-family: monospace; margin-top: 4px; }
+    .controls {
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    }
+    input {
+      background: #18181b; border: 2px solid #3f3f46; color: #fff;
+      padding: clamp(9px, 0.8vw, 14px) clamp(12px, 1.1vw, 18px); border-radius: 10px; font-size: clamp(14px, 1.1vw, 20px);
+      font-family: monospace; outline: none;
+    }
+    input:focus { border-color: #c8102e; box-shadow: 0 0 0 3px rgba(200,16,46,0.35); }
+    button {
+      background: #c8102e; color: #fff; border: 2px solid transparent;
+      padding: clamp(9px, 0.8vw, 14px) clamp(16px, 1.4vw, 24px); border-radius: 10px; font-size: clamp(14px, 1.1vw, 20px); font-weight: 700;
+      cursor: pointer; outline: none;
+    }
+    button:focus { border-color: #ffffff; background: #dc2626; box-shadow: 0 0 0 3px rgba(200,16,46,0.45); }
+    button.secondary { background: #18181b; border-color: #3f3f46; color: #e4e4e7; }
+    button.secondary:focus { border-color: #ffffff; background: #27272a; }
+    button.stop { background: #3f3f46; }
+    .stage {
+      flex: 1; background: #000; border: 1px solid #27272a; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      position: relative; padding: clamp(12px, 1.6vw, 24px);
+    }
+    canvas { width: 100%; height: 100%; object-fit: contain; }
+    .hint { color: #d4d4d8; font-size: clamp(15px, 1.25vw, 22px); text-align: center; max-width: 780px; line-height: 1.5; }
+    .gate {
+      width: 100%; max-width: 720px; background: #18181b; border: 1px solid #27272a;
+      border-radius: 16px; padding: clamp(20px, 2.2vw, 34px); display: flex; flex-direction: column; gap: 14px;
+    }
+    .gate h1 { font-size: clamp(20px, 1.9vw, 30px); font-weight: 800; color: #f8fafc; }
+    .gate p { font-size: clamp(13px, 1vw, 18px); color: #a1a1aa; line-height: 1.5; }
+    .code-box {
+      background: #09090b; border: 1px solid #3f3f46; border-radius: 12px;
+      padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .code-val {
+      font-family: monospace; font-size: clamp(20px, 2vw, 34px); font-weight: 800;
+      letter-spacing: 0.08em; color: #f87171;
+    }
+    .error-msg { color: #f87171; font-size: 16px; min-height: 20px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <div class="brand">Jogos do Mengão TV · LG webOS</div>
+        <div id="licenseMeta" class="meta">Verificando licença offline...</div>
+      </div>
+      <div id="playerControls" class="controls hidden">
+        <button id="liveBtn" type="button">Assistir Ao Vivo (Servidor)</button>
+        <input id="ipInput" type="text" value="http://192.168.1.50:8080" aria-label="Endereço IP do transmissor" style="width: 260px;" />
+        <input id="tokenInput" type="text" placeholder="TC-XXXXXX" aria-label="Token da sessão" style="width: 165px;" />
+        <button id="connectBtn" type="button" class="secondary">Wi-Fi Local (IP)</button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <!-- Bloqueio de assinatura offline por código da TV -->
+      <section id="licenseGate" class="gate">
+        <h1>Jogos do Mengão · Ativar assinatura na Smart TV LG</h1>
+        <p>
+          Código exclusivo desta TV (planos de 1 mês a 1 ano): proteção anti-retransmissão ativa
+          para exibir jogos exclusivamente em Smart TVs autorizadas. Envie o código pelo WhatsApp.
+        </p>
+        <div class="code-box">
+          <span style="font-size: 15px; color: #94a3b8;">Código desta TV</span>
+          <span id="tvDeviceCode" class="code-val">TC-0000-0000</span>
+        </div>
+        <input
+          id="serverInput"
+          type="text"
+          placeholder="URL do servidor (ex: https://seu-dominio.com)"
+        />
+        <input
+          id="keyInput"
+          type="text"
+          placeholder="Cole a chave de liberação TC1.xxx.yyy"
+        />
+        <div id="gateError" class="error-msg"></div>
+        <button id="activateBtn" type="button">Liberar TV offline</button>
+      </section>
+
+      <canvas id="playerCanvas" class="hidden"></canvas>
+      <div id="statusText" class="hint hidden">
+        Use as setas do controle remoto LG e pressione OK em "Assistir Ao Vivo (Servidor)" ou informe o IP local.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var EMBEDDED_PUBLIC_JWK = null;
+
+      var licenseGate = document.getElementById('licenseGate');
+      var playerControls = document.getElementById('playerControls');
+      var canvas = document.getElementById('playerCanvas');
+      var statusText = document.getElementById('statusText');
+      var licenseMeta = document.getElementById('licenseMeta');
+      var tvDeviceCode = document.getElementById('tvDeviceCode');
+      var serverInput = document.getElementById('serverInput');
+      var keyInput = document.getElementById('keyInput');
+      var activateBtn = document.getElementById('activateBtn');
+      var gateError = document.getElementById('gateError');
+
+      var liveBtn = document.getElementById('liveBtn');
+      var ipInput = document.getElementById('ipInput');
+      var tokenInput = document.getElementById('tokenInput');
+      var connectBtn = document.getElementById('connectBtn');
+      var ctx = canvas.getContext('2d');
+      var abortCtrl = null;
+      var wsLive = null;
+      var audioCtx = null;
+      var nextAudioTime = 0;
+      var liveSampleRate = 24000;
+      var active = false;
+      var unlocked = false;
+
+      var DEFAULT_SERVER_URL = 'https://jogos-do-mengao.onrender.com';
+      if (window.location && window.location.protocol && window.location.protocol.indexOf('http') === 0) {
+        serverInput.value = window.location.origin;
+      } else {
+        serverInput.value = DEFAULT_SERVER_URL;
+      }
+
+      var DB_NAME = 'telacast_webos_license_db';
+      var STORE = 'kv';
+      var CODE_TO_PLAN = {
+        1: '1 Mês',
+        2: '3 Meses',
+        3: '6 Meses',
+        4: '1 Ano',
+        5: 'Mensal Básico',
+        6: 'Mensal Pro',
+        7: 'Mensal Estúdio',
+        8: 'Outros'
+      };
+
+      function openDb() {
+        return new Promise(function (resolve, reject) {
+          var req = indexedDB.open(DB_NAME, 1);
+          req.onupgradeneeded = function () {
+            if (!req.result.objectStoreNames.contains(STORE)) {
+              req.result.createObjectStore(STORE);
+            }
+          };
+          req.onsuccess = function () { resolve(req.result); };
+          req.onerror = function () { reject(req.error); };
+        });
+      }
+
+      function idbGet(key) {
+        return openDb().then(function (db) {
+          return new Promise(function (resolve) {
+            var tx = db.transaction(STORE, 'readonly');
+            var req = tx.objectStore(STORE).get(key);
+            req.onsuccess = function () { resolve(req.result || null); };
+            req.onerror = function () { resolve(null); };
+          });
+        });
+      }
+
+      function idbSet(key, val) {
+        return openDb().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            var tx = db.transaction(STORE, 'readwrite');
+            tx.objectStore(STORE).put(val, key);
+            tx.oncomplete = function () { resolve(); };
+            tx.onerror = function () { reject(tx.error); };
+          });
+        });
+      }
+
+      function b64urlToBytes(str) {
+        var padded = str.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((str.length + 3) % 4);
+        var bin = atob(padded);
+        var out = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+      }
+
+      async function getOrCreateCode() {
+        var saved = await idbGet('deviceCode');
+        if (saved && /^TC-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(saved)) return saved;
+        var bytes = new Uint8Array(4);
+        crypto.getRandomValues(bytes);
+        var hex = Array.from(bytes, function (b) { return b.toString(16).padStart(2, '0'); }).join('').toUpperCase();
+        var code = 'TC-' + hex.slice(0, 4) + '-' + hex.slice(4, 8);
+        await idbSet('deviceCode', code);
+        return code;
+      }
+
+      async function getServerBase() {
+        var typed = serverInput.value.trim().replace(/\/$/, '');
+        if (typed) {
+          await idbSet('serverUrl', typed);
+          return typed;
+        }
+        var stored = await idbGet('serverUrl');
+        if (stored) {
+          serverInput.value = stored;
+          return stored;
+        }
+        if (window.location && window.location.protocol && window.location.protocol.indexOf('http') === 0) {
+          return window.location.origin;
+        }
+        serverInput.value = DEFAULT_SERVER_URL;
+        return DEFAULT_SERVER_URL;
+      }
+
+      async function getPublicJwk() {
+        if (EMBEDDED_PUBLIC_JWK) return EMBEDDED_PUBLIC_JWK;
+        var base = await getServerBase();
+        if (base) {
+          try {
+            var res = await fetch(base + '/api/licenca/chave-publica');
+            if (res.ok) {
+              var data = await res.json();
+              if (data.publicKeyJwk) {
+                await idbSet('publicKeyJwk', data.publicKeyJwk);
+                return data.publicKeyJwk;
+              }
+            }
+          } catch (e) {}
+        }
+        return idbGet('publicKeyJwk');
+      }
+
+      async function sendHeartbeat(code, licenseActive, plano) {
+        try {
+          var base = await getServerBase();
+          if (!base) return;
+          await fetch(base + '/api/app/heartbeat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              deviceCode: code,
+              platform: 'webos',
+              isTv: true,
+              licenseActive: Boolean(licenseActive),
+              planName: plano || null,
+              isStreaming: active
+            })
+          });
+        } catch (e) {}
+      }
+
+      async function verifyOfflineKey(deviceCode, rawKey, jwk) {
+        var clean = rawKey.trim();
+        var parts = clean.split('.');
+        if (parts.length !== 3 || parts[0] !== 'TC1') {
+          return { ativo: false, motivo: 'Formato de chave inválido (TC1.xxx.yyy).' };
+        }
+        try {
+          var payload = b64urlToBytes(parts[1]);
+          var sig = b64urlToBytes(parts[2]);
+          if (payload.length !== 14 || sig.length !== 64) {
+            return { ativo: false, motivo: 'Tamanho da chave inválido.' };
+          }
+          var cryptoKey = await crypto.subtle.importKey(
+            'jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']
+          );
+          var ok = await crypto.subtle.verify(
+            { name: 'ECDSA', hash: 'SHA-256' }, cryptoKey, sig.buffer, payload.buffer
+          );
+          if (!ok) return { ativo: false, motivo: 'Assinatura da chave inválida.' };
+
+          var digest = new Uint8Array(
+            await crypto.subtle.digest('SHA-256', new TextEncoder().encode(deviceCode))
+          );
+          for (var i = 0; i < 4; i++) {
+            if (payload[i] !== digest[i]) {
+              return { ativo: false, motivo: 'Esta chave pertence a outro aparelho.' };
+            }
+          }
+          var view = new DataView(payload.buffer);
+          var expSec = view.getUint32(4, false);
+          var planCode = view.getUint8(8);
+          var plano = CODE_TO_PLAN[planCode] || '1 Mês';
+          var expMs = expSec * 1000;
+          if (expMs <= Date.now()) {
+            return { ativo: false, motivo: 'Assinatura offline vencida. Gere nova chave.' };
+          }
+          var dias = Math.max(1, Math.ceil((expMs - Date.now()) / (1000 * 60 * 60 * 24)));
+          return { ativo: true, plano: plano, dias: dias };
+        } catch (err) {
+          return { ativo: false, motivo: 'Falha ao validar chave offline.' };
+        }
+      }
+
+      function showPlayer(deviceCode, res) {
+        unlocked = true;
+        licenseGate.classList.add('hidden');
+        playerControls.classList.remove('hidden');
+        canvas.classList.remove('hidden');
+        statusText.classList.remove('hidden');
+        licenseMeta.textContent = deviceCode + ' · ' + res.plano + ' · ' + res.dias + 'd offline';
+        liveBtn.focus();
+      }
+
+      async function boot() {
+        var code = await getOrCreateCode();
+        tvDeviceCode.textContent = code;
+        var savedKey = await idbGet('activationKey');
+        var jwk = await getPublicJwk();
+        if (savedKey && jwk) {
+          var check = await verifyOfflineKey(code, savedKey, jwk);
+          if (check.ativo) {
+            showPlayer(code, check);
+            sendHeartbeat(code, true, check.plano);
+            return;
+          }
+          gateError.textContent = check.motivo || '';
+        }
+        licenseMeta.textContent = 'Aparelho ' + code + ' · Aguardando ativação offline';
+        sendHeartbeat(code, false, null);
+        keyInput.focus();
+      }
+
+      setInterval(async function () {
+        if (!unlocked) return;
+        var code = await getOrCreateCode();
+        var savedKey = await idbGet('activationKey');
+        var jwk = await idbGet('publicKeyJwk') || EMBEDDED_PUBLIC_JWK;
+        if (!savedKey || !jwk) return;
+        var check = await verifyOfflineKey(code, savedKey, jwk);
+        if (!check.ativo) {
+          disconnect();
+          unlocked = false;
+          licenseGate.classList.remove('hidden');
+          playerControls.classList.add('hidden');
+          canvas.classList.add('hidden');
+          statusText.classList.add('hidden');
+          gateError.textContent = check.motivo || 'Assinatura offline vencida.';
+          licenseMeta.textContent = 'Aparelho ' + code + ' · Assinatura vencida';
+          sendHeartbeat(code, false, null);
+        } else {
+          sendHeartbeat(code, true, check.plano);
+        }
+      }, 30000);
+
+      activateBtn.addEventListener('click', async function () {
+        gateError.textContent = '';
+        var code = await getOrCreateCode();
+        var jwk = await getPublicJwk();
+        if (!jwk) {
+          gateError.textContent = 'Informe a URL do servidor na 1ª ativação ou embuta a chave pública.';
+          return;
+        }
+        var res = await verifyOfflineKey(code, keyInput.value, jwk);
+        if (!res.ativo) {
+          gateError.textContent = res.motivo;
+          return;
+        }
+        await idbSet('activationKey', keyInput.value.trim());
+        showPlayer(code, res);
+        sendHeartbeat(code, true, res.plano);
+      });
+
+      var gateFocusables = [serverInput, keyInput, activateBtn];
+      var playerFocusables = [liveBtn, ipInput, tokenInput, connectBtn];
+      var focusIdx = 0;
+
+      document.addEventListener('keydown', function (e) {
+        var list = unlocked ? playerFocusables : gateFocusables;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          focusIdx = (focusIdx + 1) % list.length;
+          list[focusIdx].focus();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          focusIdx = (focusIdx - 1 + list.length) % list.length;
+          list[focusIdx].focus();
+        } else if (e.keyCode === 461 && active) {
+          disconnect();
+        }
+      });
+
+      function disconnect() {
+        if (abortCtrl) {
+          abortCtrl.abort();
+          abortCtrl = null;
+        }
+        if (wsLive) {
+          try { wsLive.close(); } catch (e) {}
+          wsLive = null;
+        }
+        if (audioCtx) {
+          try { audioCtx.close(); } catch (e) {}
+          audioCtx = null;
+        }
+        nextAudioTime = 0;
+        active = false;
+        liveBtn.textContent = 'Assistir Ao Vivo (Servidor)';
+        liveBtn.classList.remove('stop');
+        connectBtn.textContent = 'Wi-Fi Local (IP)';
+        connectBtn.classList.remove('stop');
+        statusText.style.display = 'block';
+        statusText.textContent = 'Transmissão desconectada.';
+      }
+
+      async function connectLiveWs() {
+        disconnect();
+        var base = await getServerBase();
+        if (!base) {
+          statusText.textContent = 'URL do servidor não configurada para o modo Ao Vivo.';
+          return;
+        }
+        var code = await getOrCreateCode();
+        var savedKey = await idbGet('activationKey');
+        var wsUrl = base.replace(/^http:/i, 'ws:').replace(/^https:/i, 'wss:') + '/ws/live';
+
+        active = true;
+        liveBtn.textContent = 'Parar Ao Vivo';
+        liveBtn.classList.add('stop');
+        statusText.style.display = 'block';
+        statusText.textContent = 'Conectando ao canal ao vivo do servidor...';
+
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          audioCtx = new AudioCtx({ sampleRate: liveSampleRate });
+          nextAudioTime = 0;
+        }
+
+        wsLive = new WebSocket(wsUrl);
+        wsLive.binaryType = 'arraybuffer';
+
+        wsLive.onopen = function () {
+          wsLive.send(JSON.stringify({
+            type: 'auth:viewer',
+            deviceCode: code,
+            activationKey: savedKey || ''
+          }));
+        };
+
+        wsLive.onmessage = async function (event) {
+          if (typeof event.data === 'string') {
+            try {
+              var msg = JSON.parse(event.data);
+              if (msg.type === 'auth:error') {
+                disconnect();
+                statusText.textContent = msg.erro || 'Licença inválida para assistir.';
+                return;
+              }
+              if (msg.state && msg.state.sampleRate) {
+                liveSampleRate = msg.state.sampleRate;
+              }
+              if (msg.state && msg.state.isLive) {
+                statusText.style.display = 'none';
+              } else if (msg.state && !msg.state.isLive) {
+                statusText.style.display = 'block';
+                statusText.textContent = 'Aguardando o administrador iniciar o jogo ao vivo...';
+              }
+            } catch (e) {}
+            return;
+          }
+
+          var buf = new Uint8Array(event.data);
+          if (buf.length < 2) return;
+          var kind = buf[0];
+          if (kind === 0x01) {
+            statusText.style.display = 'none';
+            var jpegSlice = buf.slice(1);
+            var blob = new Blob([jpegSlice], { type: 'image/jpeg' });
+            try {
+              var bmp = await createImageBitmap(blob);
+              if (canvas.width !== bmp.width || canvas.height !== bmp.height) {
+                canvas.width = bmp.width;
+                canvas.height = bmp.height;
+              }
+              ctx.drawImage(bmp, 0, 0);
+              bmp.close();
+            } catch (e) {}
+          } else if (kind === 0x02 && audioCtx) {
+            if (audioCtx.state === 'suspended') {
+              audioCtx.resume().catch(function () {});
+            }
+            var pcmBytes = buf.slice(1);
+            var samples = Math.floor(pcmBytes.byteLength / 2);
+            if (samples === 0) return;
+            var view = new DataView(pcmBytes.buffer, pcmBytes.byteOffset, pcmBytes.byteLength);
+            var ab = audioCtx.createBuffer(1, samples, liveSampleRate);
+            var ch = ab.getChannelData(0);
+            for (var i = 0; i < samples; i++) {
+              ch[i] = view.getInt16(i * 2, true) / 32768;
+            }
+            var src = audioCtx.createBufferSource();
+            src.buffer = ab;
+            src.connect(audioCtx.destination);
+            var now = audioCtx.currentTime;
+            var startAt = Math.max(now, nextAudioTime);
+            src.start(startAt);
+            nextAudioTime = startAt + ab.duration;
+          }
+        };
+
+        wsLive.onerror = function () {
+          disconnect();
+          statusText.textContent = 'Não foi possível conectar ao servidor ao vivo.';
+        };
+      }
+
+      async function connectLan() {
+        disconnect();
+        var host = ipInput.value.trim().replace(/\/$/, '');
+        var token = tokenInput.value.trim();
+        if (!host || !token) {
+          statusText.textContent = 'Informe o IP local e o token da sessão.';
+          return;
+        }
+        abortCtrl = new AbortController();
+        active = true;
+        connectBtn.textContent = 'Desconectar';
+        connectBtn.classList.add('stop');
+        statusText.textContent = 'Conectando ao aparelho Android na rede Wi-Fi...';
+
+        try {
+          var res = await fetch(host + '/stream?token=' + encodeURIComponent(token), {
+            headers: {
+              'X-TelaCast-App': 'TelaCast-LG-webOS/1.0',
+              'X-Device-Type': 'tv'
+            },
+            signal: abortCtrl.signal
+          });
+          if (!res.ok || !res.body) {
+            disconnect();
+            statusText.textContent = 'Acesso recusado (HTTP ' + res.status + '). Confira o token.';
+            return;
+          }
+
+          statusText.style.display = 'none';
+          var reader = res.body.getReader();
+          var buffer = new Uint8Array(0);
+
+          while (active) {
+            var chunk = await reader.read();
+            if (chunk.done) break;
+            var merged = new Uint8Array(buffer.length + chunk.value.length);
+            merged.set(buffer);
+            merged.set(chunk.value, buffer.length);
+            buffer = merged;
+
+            var s = -1;
+            for (var i = 0; i < buffer.length - 1; i++) {
+              if (buffer[i] === 0xff && buffer[i + 1] === 0xd8) { s = i; break; }
+            }
+            if (s === -1) continue;
+
+            var e = -1;
+            for (var j = s + 2; j < buffer.length - 1; j++) {
+              if (buffer[j] === 0xff && buffer[j + 1] === 0xd9) { e = j + 2; break; }
+            }
+            if (e === -1) continue;
+
+            var jpeg = buffer.slice(s, e);
+            buffer = buffer.slice(e);
+            var blob = new Blob([jpeg], { type: 'image/jpeg' });
+            var bmp = await createImageBitmap(blob);
+            if (canvas.width !== bmp.width || canvas.height !== bmp.height) {
+              canvas.width = bmp.width;
+              canvas.height = bmp.height;
+            }
+            ctx.drawImage(bmp, 0, 0);
+            bmp.close();
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            disconnect();
+            statusText.textContent = 'Erro de conexão com o transmissor Wi-Fi.';
+          }
+        }
+      }
+
+      liveBtn.addEventListener('click', function () {
+        if (active && wsLive) disconnect(); else connectLiveWs();
+      });
+
+      connectBtn.addEventListener('click', function () {
+        if (active && abortCtrl) disconnect(); else connectLan();
+      });
+
+      boot();
+    })();
+  </script>
+</body>
+</html>

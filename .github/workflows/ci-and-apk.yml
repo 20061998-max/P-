@@ -1,0 +1,186 @@
+name: CI, Build APK & Auto Deploy (Jogos do Mengão)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-ci:
+    name: Validar TypeScript, Firestore Rules e Build Web
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v7
+
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Instalar dependências
+        run: npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Verificar TypeScript (tsc --noEmit)
+        run: npm run lint
+
+      - name: Validar regras de segurança Firestore
+        run: npx eslint firestore.rules
+
+      - name: Build de produção (Vite + PWA)
+        run: npm run build
+
+      - name: Enviar build Web/PWA como artefato
+        uses: actions/upload-artifact@v7
+        with:
+          name: JogosDoMengao-Web-Dist
+          path: dist/
+
+  build-android-apk:
+    name: Compilar APK Android/TV e Pacote LG webOS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v7
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Configurar Gradle 8.9
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.9'
+
+      - name: Compilar APK Android e Android TV
+        working-directory: android
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL || 'https://jogos-do-mengao.onrender.com' }}
+          LICENSE_PUBLIC_KEY: ${{ vars.LICENSE_PUBLIC_KEY || 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEkVVaVo/Pjsv4PvoeZIJvUnQlzg0WmSuKZsnR/i10u2+/fF0QraX4VWIrCxsVLWi9hAujF9DEXuJIcNUTo97FrA==' }}
+          ADMIN_WHATSAPP: ${{ vars.ADMIN_WHATSAPP || '5548998091948' }}
+        run: gradle assembleDebug --no-daemon
+
+      - name: Preparar APK e pacote LG webOS
+        run: |
+          mkdir -p dist-releases
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist-releases/JogosDoMengao.apk
+          (cd webos && zip -r ../dist-releases/JogosDoMengao-LG-webOS.zip .)
+
+      - name: Publicar APK e webOS como Artefato do Actions
+        uses: actions/upload-artifact@v7
+        with:
+          name: JogosDoMengao-Releases
+          path: dist-releases/
+
+  publish-release:
+    name: Publicar Release Automática (APK + LG webOS)
+    needs: [web-ci, build-android-apk]
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Baixar artefatos de release
+        uses: actions/download-artifact@v8
+        with:
+          name: JogosDoMengao-Releases
+          path: /tmp/dist-releases
+
+      - name: Publicar ou atualizar Release "latest" no GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view latest --repo "$GH_REPO" >/dev/null 2>&1; then
+            gh release upload latest /tmp/dist-releases/JogosDoMengao.apk /tmp/dist-releases/JogosDoMengao-LG-webOS.zip --clobber --repo "$GH_REPO"
+          else
+            gh release create latest /tmp/dist-releases/JogosDoMengao.apk /tmp/dist-releases/JogosDoMengao-LG-webOS.zip \
+              --repo "$GH_REPO" \
+              --target "${{ github.sha }}" \
+              --title "Jogos do Mengão — Última Versão Automática" \
+              --notes "APK Android/Android TV (com permissão para abrir apps nativos) e pacote LG webOS gerados automaticamente."
+          fi
+
+      - name: Gravar JogosDoMengao.apk atualizado no repositório
+        run: |
+          mkdir -p public/downloads
+          cp /tmp/dist-releases/JogosDoMengao.apk public/downloads/JogosDoMengao.apk
+          if [ -n "$(git status --porcelain public/downloads/JogosDoMengao.apk)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add public/downloads/JogosDoMengao.apk
+            git commit -m "chore(apk): sync compiled JogosDoMengao.apk [skip ci]"
+            git push origin HEAD:${{ github.ref_name }} || true
+          fi
+
+  auto-deploy:
+    name: Auto-Deploy Produção (Cloud Run / Firebase / Webhook)
+    needs: [web-ci, publish-release]
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    env:
+      HAS_FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+      HAS_GCP_SA: ${{ secrets.GCP_SA_KEY != '' }}
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v7
+
+      - name: Publicar Regras Firestore no Firebase (ageless-catcher-t7cdj)
+        if: env.HAS_FIREBASE_SA == 'true'
+        env:
+          FIREBASE_SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$FIREBASE_SA_JSON" > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          npx --yes firebase-tools@latest deploy --only firestore:rules --project ageless-catcher-t7cdj --non-interactive
+          rm -f /tmp/firebase-sa.json
+
+      - name: Autenticar no Google Cloud (quando GCP_SA_KEY estiver configurada)
+        id: gcp-auth
+        if: vars.GCP_PROJECT_ID != '' && env.HAS_GCP_SA == 'true'
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Auto-Deploy para Google Cloud Run
+        if: vars.GCP_PROJECT_ID != '' && env.HAS_GCP_SA == 'true'
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: ${{ vars.CLOUD_RUN_SERVICE || 'jogos-do-mengao' }}
+          region: ${{ vars.GCP_REGION || 'southamerica-east1' }}
+          source: .
+          flags: >-
+            --allow-unauthenticated
+            --set-env-vars=NODE_ENV=production,APK_DOWNLOAD_URL=https://github.com/${{ github.repository }}/releases/download/latest/JogosDoMengao.apk
+
+      - name: Acionar Webhook de Deploy (Render / Railway / Host Customizado)
+        env:
+          DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+        run: |
+          if [ -n "$DEPLOY_WEBHOOK_URL" ]; then
+            echo "Disparando auto-deploy via webhook configurado..."
+            curl -fsSL -X POST "$DEPLOY_WEBHOOK_URL"
+          else
+            echo "Webhook opcional não configurado (DEPLOY_WEBHOOK_URL vazio)."
+          fi

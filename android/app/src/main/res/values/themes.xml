@@ -1,0 +1,15 @@
+<resources>
+    <style name="Theme.TelaCast" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#C8102E</item>
+        <item name="colorPrimaryVariant">#991B1B</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="Theme.TelaCast.Translucent" parent="Theme.TelaCast">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+</resources>

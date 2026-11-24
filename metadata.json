@@ -1,0 +1,6 @@
+{
+  "name": "TelaCast",
+  "description": "Plataforma SaaS de espelhamento de tela Android ao vivo via Wi-Fi com gestão de assinaturas, webhook de pagamentos e projeto nativo Kotlin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

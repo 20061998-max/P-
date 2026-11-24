@@ -1,0 +1,17 @@
+node_modules
+dist
+dev-dist
+.git
+.env
+.env.*
+!.env.example
+data/store.json
+data/store.json.tmp
+data/license-keypair.json
+data/offline-licenses.json
+android/.gradle
+android/app/build
+android/build
+.aistudio
+public/assets/aistudio
+*.log

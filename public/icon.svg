@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#18181B"/>
+      <stop offset="100%" stop-color="#09090B"/>
+    </linearGradient>
+    <clipPath id="shieldClip">
+      <path d="M136 58H376V208C376 286 310 338 256 360C202 338 136 286 136 208V58Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Fundo escuro rubro-negro -->
+  <rect width="512" height="512" rx="96" fill="url(#bgGrad)"/>
+  <rect x="10" y="10" width="492" height="492" rx="88" stroke="#C8102E" stroke-width="6" stroke-opacity="0.7"/>
+
+  <!-- Borda externa do Escudo do Mengão -->
+  <path d="M128 50H384V210C384 294 314 348 256 372C198 348 128 294 128 210V50Z" fill="#09090B" stroke="#FFFFFF" stroke-width="10"/>
+
+  <!-- Listras rubro-negras dentro do escudo -->
+  <g clip-path="url(#shieldClip)">
+    <rect x="136" y="58" width="240" height="50" fill="#C8102E"/>
+    <rect x="136" y="108" width="240" height="50" fill="#09090B"/>
+    <rect x="136" y="158" width="240" height="50" fill="#C8102E"/>
+    <rect x="136" y="208" width="240" height="50" fill="#09090B"/>
+    <rect x="136" y="258" width="240" height="50" fill="#C8102E"/>
+    <rect x="136" y="308" width="240" height="60" fill="#09090B"/>
+  </g>
+
+  <!-- Quadro superior esquerdo com monograma CRF -->
+  <rect x="136" y="58" width="112" height="106" fill="#C8102E" stroke="#FFFFFF" stroke-width="7"/>
+  <text x="192" y="128" text-anchor="middle" fill="#FFFFFF" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="46" letter-spacing="-2">CRF</text>
+
+  <!-- Faixa com o nome do app: JOGOS DO MENGÃO -->
+  <rect x="52" y="388" width="408" height="76" rx="18" fill="#C8102E" stroke="#FFFFFF" stroke-width="4"/>
+  <text x="256" y="438" text-anchor="middle" fill="#FFFFFF" font-family="'Arial Narrow', Arial, sans-serif" font-weight="900" font-size="38" letter-spacing="1.5">JOGOS DO MENGÃO</text>
+</svg>

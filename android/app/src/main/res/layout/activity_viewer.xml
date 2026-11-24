@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#090D16"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModoOnline"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:focusable="true"
+            android:text="Ao Vivo Online"
+            android:textAllCaps="false"
+            android:textSize="13sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModoWifi"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:focusable="true"
+            android:text="Wi-Fi Local (IP)"
+            android:textAllCaps="false"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutWifiInputs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/inputEndereco"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="#1E293B"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="http://192.168.1.50:8080"
+            android:imeOptions="actionNext"
+            android:inputType="textUri"
+            android:nextFocusRight="@+id/inputToken"
+            android:paddingHorizontal="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#94A3B8"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/inputToken"
+            android:layout_width="130dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="#1E293B"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="TC-XXXXXX"
+            android:imeOptions="actionDone"
+            android:inputType="textCapCharacters"
+            android:nextFocusDown="@+id/btnConectar"
+            android:paddingHorizontal="10dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#94A3B8"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConectar"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="10dp"
+        android:focusable="true"
+        android:text="Assistir Ao Vivo Online"
+        android:textAllCaps="false" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_weight="1"
+        android:background="#000000">
+
+        <ImageView
+            android:id="@+id/imgStream"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="Tela transmitida ao vivo"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/txtViewerStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="Toque em Assistir Ao Vivo Online para receber a transmissão do administrador com áudio e vídeo"
+            android:textColor="#94A3B8"
+            android:textSize="14sp" />
+    </FrameLayout>
+
+</LinearLayout>

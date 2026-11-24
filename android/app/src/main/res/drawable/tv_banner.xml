@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#09090B"
+                android:centerColor="#450A0A"
+                android:endColor="#C8102E" />
+            <size android:width="320dp" android:height="180dp" />
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/ic_launcher_mengao"
+        android:width="116dp"
+        android:height="116dp"
+        android:gravity="center" />
+</layer-list>

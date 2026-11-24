@@ -1,0 +1,15 @@
+{
+  "id": "com.jogosdomengao.tv",
+  "version": "1.0.0",
+  "vendor": "Jogos do Mengão",
+  "type": "web",
+  "main": "index.html",
+  "title": "Jogos do Mengão TV",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "iconColor": "#C8102E",
+  "bgColor": "#09090b",
+  "resolution": "1920x1080",
+  "handlesRelaunch": true,
+  "disableBackHistoryAPI": true
+}

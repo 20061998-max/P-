@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#09090B"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtAssinante"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="#A1A1AA"
+            android:textSize="13sp" />
+
+        <!-- Ação Instantânea: Espelhar Tela Direto + Botão Flutuante TRANSMITIR AGR -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#18181B"
+            app:strokeColor="#C8102E"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Função Administrador · Iniciar Transmissão"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Aperte INICIAR TRANSMISSÃO para fixar o botão flutuante em qualquer app dentro ou fora do app oficial. Ao tocar nele, qualquer app do celular transmite ao vivo para o site e usuários simultaneamente."
+                    android:textColor="#A1A1AA"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTransmitirAgora"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="14dp"
+                    android:text="INICIAR TRANSMISSÃO"
+                    android:textAllCaps="false"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#C8102E" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBotaoFlutuante"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Ativar Botão Flutuante &quot;INICIAR TRANSMISSÃO&quot;"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    app:strokeColor="#3F3F46" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Conectar Site (Transmissão Ao Vivo sem depender do navegador) -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="#18181B"
+            app:strokeColor="#27272A"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Conectar Site (Transmissão Ao Vivo)"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Conecte sua senha admin do site uma vez para transmitir vídeo e áudio direto como uma gravação de tela ao vivo."
+                    android:textColor="#A1A1AA"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/inputServerUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="10dp"
+                    android:background="#09090B"
+                    android:hint="https://seu-site..."
+                    android:inputType="textUri"
+                    android:paddingHorizontal="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#71717A"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/inputAdminPasscode"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="8dp"
+                    android:background="#09090B"
+                    android:hint="Senha de administrador do site"
+                    android:inputType="textPassword"
+                    android:paddingHorizontal="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#71717A"
+                    android:textSize="13sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConectarSite"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Conectar Site Ao Vivo"
+                    android:textAllCaps="false"
+                    app:backgroundTint="#059669" />
+
+                <TextView
+                    android:id="@+id/txtConexaoSiteStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Não conectado ao site ainda (somente Wi-Fi local)."
+                    android:textColor="#A1A1AA"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Procurar e Transmitir para Meu Aplicativo Nativo -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="#18181B"
+            app:strokeColor="#27272A"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Procurar Meu Aplicativo Nativo"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Digite o nome ou pacote do seu aplicativo instalado para encontrar automaticamente e transmitir para ele."
+                    android:textColor="#A1A1AA"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/inputBuscarAppNativo"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:background="#09090B"
+                        android:hint="Ex: IPTV, FlaTV, Premiere..."
+                        android:inputType="text"
+                        android:paddingHorizontal="12dp"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#71717A"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnBuscarAppNativo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="46dp"
+                        android:layout_marginStart="8dp"
+                        android:text="Procurar"
+                        android:textAllCaps="false"
+                        app:backgroundTint="#27272A" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtResultadoBuscaApp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Buscando apps instalados no celular..."
+                    android:textColor="#34D399"
+                    android:textSize="11sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerAppsNativos"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="#27272A" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnIniciarEAbrirApp"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Transmitir e abrir app encontrado"
+                    android:textAllCaps="false"
+                    app:backgroundTint="#C8102E" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAbrirAppNativo"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Abrir app selecionado agora"
+                    android:textAllCaps="false"
+                    android:textColor="#E4E4E7"
+                    app:strokeColor="#3F3F46" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Status da Transmissão e Wi-Fi Local -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="#18181B"
+            app:strokeColor="#27272A"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status e Rede Local Wi-Fi"
+                    android:textColor="#A1A1AA"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/txtUrlLocal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="monospace"
+                    android:text="http://192.168.1.50:8080"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtStatusStream"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Aguardando início da transmissão"
+                    android:textColor="#A1A1AA"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCopiarUrl"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="12dp"
+                    android:text="Copiar URL de visualização (TV)"
+                    android:textAllCaps="false"
+                    android:textColor="#E4E4E7"
+                    app:strokeColor="#3F3F46" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnToggleStream"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="14dp"
+            android:text="Espelhar tela direto (Sem app)"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:strokeColor="#3F3F46" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModoReceptor"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:text="Assistir Transmissão Ao Vivo"
+            android:textAllCaps="false"
+            android:textColor="#E4E4E7"
+            app:strokeColor="#3F3F46" />
+
+    </LinearLayout>
+</ScrollView>

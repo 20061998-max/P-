@@ -1,0 +1,10 @@
+# Copie este arquivo para local.properties e preencha suas URLs/chaves públicas
+SUPABASE_URL=https://seu-projeto.supabase.co
+SUPABASE_ANON_KEY=sua-chave-anon-publica
+API_BASE_URL=https://seu-dominio.com
+# Chave pública ECDSA P-256 em Base64 SPKI (obtida em /api/licenca/chave-publica) para validação 100% offline
+LICENSE_PUBLIC_KEY=
+# Número de WhatsApp do administrador com DDI e DDD (ex: 5511999999999)
+ADMIN_WHATSAPP=
+
+

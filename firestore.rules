@@ -1,0 +1,194 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && (
+          request.auth.token.email == 'josuelroque05052020@gmail.com'
+          || exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        );
+    }
+
+    function isValidSettings(data) {
+      return data.keys().hasAll([
+          'appName',
+          'tagline',
+          'whatsappNumber',
+          'pixKey',
+          'pixType',
+          'pixReceiverName',
+          'tvOnlyAntiRetransmission',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'appName',
+          'tagline',
+          'whatsappNumber',
+          'pixKey',
+          'pixType',
+          'pixReceiverName',
+          'pixQrCodeDataUrl',
+          'tvOnlyAntiRetransmission',
+          'updatedAt'
+        ])
+        && data.appName is string && data.appName.size() >= 2 && data.appName.size() <= 60
+        && data.tagline is string && data.tagline.size() >= 2 && data.tagline.size() <= 160
+        && data.whatsappNumber is string && data.whatsappNumber.size() <= 30
+        && data.pixKey is string && data.pixKey.size() <= 140
+        && data.pixType is string && data.pixType in ['CPF', 'CNPJ', 'E-mail', 'Telefone', 'Aleatória']
+        && data.pixReceiverName is string && data.pixReceiverName.size() <= 80
+        && (!('pixQrCodeDataUrl' in data) || (data.pixQrCodeDataUrl is string && data.pixQrCodeDataUrl.size() <= 150000))
+        && data.tvOnlyAntiRetransmission is bool
+        && data.updatedAt == request.time;
+    }
+
+    function isValidPlan(data) {
+      return data.keys().hasAll([
+          'name',
+          'subtitle',
+          'priceText',
+          'days',
+          'periodLabel',
+          'features',
+          'featured',
+          'active',
+          'sortOrder',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'name',
+          'subtitle',
+          'priceText',
+          'days',
+          'periodLabel',
+          'features',
+          'featured',
+          'active',
+          'sortOrder',
+          'updatedAt'
+        ])
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 60
+        && data.subtitle is string && data.subtitle.size() <= 140
+        && data.priceText is string && data.priceText.size() >= 1 && data.priceText.size() <= 40
+        && data.days is int && data.days >= 0 && data.days <= 3650
+        && data.periodLabel is string && data.periodLabel.size() <= 40
+        && data.features is list && data.features.size() <= 8
+        && (data.features.size() == 0 || (data.features[0] is string && data.features[0].size() <= 160))
+        && data.featured is bool
+        && data.active is bool
+        && data.sortOrder is int && data.sortOrder >= 0 && data.sortOrder <= 999
+        && data.updatedAt == request.time;
+    }
+
+    function isValidOfflineLicense(data) {
+      return data.keys().hasAll([
+          'deviceCode',
+          'plano',
+          'dias',
+          'expira_em',
+          'activationKey',
+          'createdByUid',
+          'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'deviceCode',
+          'plano',
+          'dias',
+          'expira_em',
+          'activationKey',
+          'createdByUid',
+          'createdAt'
+        ])
+        && data.deviceCode is string && data.deviceCode.size() >= 10 && data.deviceCode.size() <= 20
+        && data.deviceCode.matches('^TC-[A-Z0-9]{4}-[A-Z0-9]{4}$')
+        && data.plano is string && data.plano.size() >= 2 && data.plano.size() <= 60
+        && data.dias is int && data.dias >= 1 && data.dias <= 3650
+        && data.expira_em is string && data.expira_em.size() >= 10 && data.expira_em.size() <= 40
+        && data.activationKey is string && data.activationKey.size() >= 20 && data.activationKey.size() <= 256
+        && data.createdByUid is string && data.createdByUid == request.auth.uid
+        && data.createdAt == request.time;
+    }
+
+    match /test/{docId} {
+      allow get: if isValidId(docId) && docId == 'connection';
+      allow list, create, update, delete: if false;
+    }
+
+    match /admins/{adminUid} {
+      allow get: if isSignedIn() && isValidId(adminUid) && (request.auth.uid == adminUid || isAdmin());
+      allow list, create, update, delete: if false;
+    }
+
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId) && settingId == 'public';
+      allow list: if false;
+      allow create: if isAdmin() && isValidId(settingId) && settingId == 'public' && isValidSettings(incoming());
+      allow update: if isAdmin()
+        && isValidId(settingId)
+        && settingId == 'public'
+        && isValidSettings(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'appName',
+          'tagline',
+          'whatsappNumber',
+          'pixKey',
+          'pixType',
+          'pixReceiverName',
+          'pixQrCodeDataUrl',
+          'tvOnlyAntiRetransmission',
+          'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    match /plans/{planId} {
+      allow get: if isValidId(planId) && (existing().active == true || isAdmin());
+      allow list: if resource.data.active == true || isAdmin();
+      allow create: if isAdmin() && isValidId(planId) && isValidPlan(incoming());
+      allow update: if isAdmin()
+        && isValidId(planId)
+        && isValidPlan(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'name',
+          'subtitle',
+          'priceText',
+          'days',
+          'periodLabel',
+          'features',
+          'featured',
+          'active',
+          'sortOrder',
+          'updatedAt'
+        ]);
+      allow delete: if isAdmin() && isValidId(planId);
+    }
+
+    match /offline_licenses/{licenseId} {
+      allow get: if isAdmin() && isValidId(licenseId);
+      allow list: if isAdmin() && resource.data.createdByUid == request.auth.uid;
+      allow create: if isAdmin() && isValidId(licenseId) && isValidOfflineLicense(incoming());
+      allow update, delete: if false;
+    }
+  }
+}
